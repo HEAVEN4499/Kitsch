@@ -1,0 +1,17 @@
+test
+:q
+plugins
+exit
+run
+re-run
+run-only AkkaTest
+run
+:q
+exit
+run
+exit
+plugins
+show
+test
+about
+exit

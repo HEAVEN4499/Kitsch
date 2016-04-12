@@ -5,8 +5,8 @@ version := "0.1"
 scalaVersion := "2.10.6"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka"     %% "akka-actor"         % "2.3.14",
-  "com.typesafe.akka"     %% "akka-remote"        % "2.3.14",
+  "com.typesafe.akka"     %% "akka-actor"         % "2.3.15",
+  "com.typesafe.akka"     %% "akka-remote"        % "2.3.15",
   "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
   "org.scalanlp"          %% "breeze"             % "0.11.2",
   "org.scalanlp"          %% "breeze-natives"     % "0.11.2",

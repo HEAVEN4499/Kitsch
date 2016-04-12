@@ -1,48 +1,58 @@
 package kitsch.rdd
 
+import kitsch.partition.Partition
 import kitsch.util.collection.CompactBuffer
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.HashMap
+import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import scala.reflect.ClassTag
 
 /**
  * Created by wulicheng on 16/4/3.
  */
-private[kitsch] class CoGroupedRDD[K: ClassTag](
-                                                @transient var rdds: Seq[RDD[_ <: Product2[K, _]]])
-  extends RDD[(K, Seq[Iterable[_]])](rdds.head.kitsch) {
+private[kitsch] class CoGroupedRDD[K: ClassTag](@transient var rdds: Seq[RDD[_ <: Product2[K, _]]])
+  extends RDD[(K, Seq[Iterator[_]])](rdds.head.kitsch) {
 
+  private type T = Product2[K, _]
   private type CoGroup = CompactBuffer[Any]
-  private type CoGroupValue = (Any, Int)  // Int is the idx of the rdd in the cogroup
+  private type CoGroupValue = (T, Int)  // Int is the idx of the rdd in the cogroup
   private type CoGroupCombiner = Seq[CoGroup]
 
-  override def compute(): Iterator[(K, Seq[Iterable[_]])] = {
+  override def compute(): Seq[Future[Partition[(K, Seq[Iterator[_]])]]] = {
     val numRdds = rdds.length
-
-    val rddIterators = new ArrayBuffer[(Iterator[Product2[K, Any]], Int)]
-    for ((rdd, depNum) <- rdds.zipWithIndex) {
-      rddIterators += ((rdd.compute(), depNum))
+    val rddIterators = rdds.zipWithIndex.map {
+      case (rdd, depNum) => {
+        val partitions = Await.result(Future.sequence(rdd.compute()), Duration.Inf)
+        partitions.map { p =>
+          (Await.result(p.data, Duration.Inf).asInstanceOf[Iterator[Product2[K, T]]], depNum)
+        }
+      }
     }
 
-    val map = HashMap[K, CoGroupCombiner]()
+    val hashMap = HashMap[K, CoGroupCombiner]()
 
-    val createCombiner: (() => CoGroupCombiner) = () => {
-      val newCombiner = Seq.fill(numRdds)(new CoGroup)
-      newCombiner
-    }
+    val createCombiner: () => CoGroupCombiner =
+      () => Seq.fill(numRdds)(new CoGroup)
+
     val mergeValue: (CoGroupCombiner, CoGroupValue) => CoGroupCombiner =
       (combiner, value) => {
         combiner(value._2) += value._1
         combiner
       }
 
-    for ((it, rddIdx) <- rddIterators) {
-      it.foreach { pair =>
-        mergeValue(map.getOrElseUpdate(pair._1, createCombiner()), new CoGroupValue(pair._2, rddIdx))
+    for (seq <- rddIterators) {
+      for ((iter, rddIndex) <- seq) {
+        iter foreach { pair =>
+          mergeValue(hashMap.getOrElseUpdate(pair._1, createCombiner()),
+            new CoGroupValue(pair._2, rddIndex))
+        }
       }
     }
 
-    map.iterator
+    kitsch.parallelize(hashMap.map{
+      case (k, v) => (k, v.map(_.iterator))
+    }.toSeq).compute
   }
 }

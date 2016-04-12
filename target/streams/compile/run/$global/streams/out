@@ -3,9 +3,9 @@
 [0m[[0mdebug[0m] [0m  Classpath:[0m
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/Documents/workspace/Kitsch/target/scala-2.10/classes[0m
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.10.6.jar[0m
-[0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.typesafe.akka/akka-actor_2.10/jars/akka-actor_2.10-2.3.14.jar[0m
+[0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.typesafe.akka/akka-actor_2.10/jars/akka-actor_2.10-2.3.15.jar[0m
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar[0m
-[0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.typesafe.akka/akka-remote_2.10/jars/akka-remote_2.10-2.3.14.jar[0m
+[0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.typesafe.akka/akka-remote_2.10/jars/akka-remote_2.10-2.3.15.jar[0m
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/io.netty/netty/bundles/netty-3.8.0.Final.jar[0m
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.google.protobuf/protobuf-java/bundles/protobuf-java-2.5.0.jar[0m
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/org.uncommons.maths/uncommons-maths/jars/uncommons-maths-1.2.2a.jar[0m
@@ -54,30 +54,27 @@
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.google.guava/guava/bundles/guava-19.0.jar[0m
 [0m[[0mdebug[0m] [0m	/Users/wulicheng/.ivy2/cache/com.google.code.findbugs/jsr305/jars/jsr305-2.0.3.jar[0m
 [0m[[0mdebug[0m] [0mWaiting for thread run-main-0 to terminate.[0m
-[0m[[31merror[0m] [0m(run-main-0) java.lang.IndexOutOfBoundsException: (50000,0) not in [-50000,50000) x [-1,1)[0m
-java.lang.IndexOutOfBoundsException: (50000,0) not in [-50000,50000) x [-1,1)
-	at breeze.linalg.DenseMatrix$mcD$sp.update$mcD$sp(DenseMatrix.scala:112)
-	at kitsch.linear.PartialLeastSquares$$anonfun$4$$anonfun$apply$4.apply$mcVI$sp(PartialLeastSquares.scala:494)
-	at scala.collection.immutable.Range.foreach$mVc$sp(Range.scala:141)
-	at kitsch.linear.PartialLeastSquares$$anonfun$4.apply(PartialLeastSquares.scala:492)
-	at kitsch.linear.PartialLeastSquares$$anonfun$4.apply(PartialLeastSquares.scala:489)
-	at scala.collection.Iterator$class.foreach(Iterator.scala:727)
-	at scala.collection.AbstractIterator.foreach(Iterator.scala:1157)
-	at kitsch.linear.PartialLeastSquares$.train(PartialLeastSquares.scala:489)
-	at kitsch.Kitsch$.main(Kitsch.scala:88)
-	at kitsch.Kitsch.main(Kitsch.scala)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:483)
-	at sbt.Run.invokeMain(Run.scala:67)
-	at sbt.Run.run0(Run.scala:61)
-	at sbt.Run.sbt$Run$$execute$1(Run.scala:51)
-	at sbt.Run$$anonfun$run$1.apply$mcV$sp(Run.scala:55)
-	at sbt.Run$$anonfun$run$1.apply(Run.scala:55)
-	at sbt.Run$$anonfun$run$1.apply(Run.scala:55)
-	at sbt.Logger$$anon$4.apply(Logger.scala:85)
-	at sbt.TrapExit$App.run(TrapExit.scala:248)
-	at java.lang.Thread.run(Thread.java:745)
 [0m[[0mdebug[0m] [0m	Thread run-main-0 exited.[0m
-[0m[[0mdebug[0m] [0mWaiting for thread New I/O worker #4 to terminate.[0m
+[0m[[0mdebug[0m] [0mWaiting for thread New I/O worker #2 to terminate.[0m
+[0m[[0mdebug[0m] [0m	Thread test-8 exited.[0m
+[0m[[0mdebug[0m] [0mWaiting for thread test-akka.remote.default-remote-dispatcher-5 to terminate.[0m
+[0m[[0mdebug[0m] [0m	Thread test-akka.remote.default-remote-dispatcher-5 exited.[0m
+[0m[[0mdebug[0m] [0mWaiting for thread test-akka.actor.default-dispatcher-4 to terminate.[0m
+[0m[[0mdebug[0m] [0m	Thread test-akka.actor.default-dispatcher-4 exited.[0m
+[0m[[0mdebug[0m] [0mInterrupting remaining threads (should be all daemons).[0m
+[0m[[0mdebug[0m] [0mInterrupting thread ForkJoinPool-3-worker-11[0m
+[0m[[0mdebug[0m] [0m	Interrupted ForkJoinPool-3-worker-11[0m
+[0m[[0mdebug[0m] [0mInterrupting thread ForkJoinPool-3-worker-5[0m
+[0m[[0mdebug[0m] [0m	Interrupted ForkJoinPool-3-worker-5[0m
+[0m[[0mdebug[0m] [0mInterrupting thread ForkJoinPool-3-worker-7[0m
+[0m[[0mdebug[0m] [0m	Interrupted ForkJoinPool-3-worker-7[0m
+[0m[[0mdebug[0m] [0mInterrupting thread test-9[0m
+[0m[[0mdebug[0m] [0m	Interrupted test-9[0m
+[0m[[0mdebug[0m] [0mInterrupting thread ForkJoinPool-3-worker-1[0m
+[0m[[0mdebug[0m] [0m	Interrupted ForkJoinPool-3-worker-1[0m
+[0m[[0mdebug[0m] [0mInterrupting thread Thread-1[0m
+[0m[[0mdebug[0m] [0m	Interrupted Thread-1[0m
+[0m[[0mdebug[0m] [0mInterrupting thread ForkJoinPool-3-worker-3[0m
+[0m[[0mdebug[0m] [0m	Interrupted ForkJoinPool-3-worker-3[0m
+[0m[[0mdebug[0m] [0mSandboxed run complete..[0m
+[0m[[0mdebug[0m] [0mExited with code 0[0m

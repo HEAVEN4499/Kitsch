@@ -2,14 +2,15 @@ package kitsch.rdd
 
 import akka.pattern.ask
 import akka.util.Timeout
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import kitsch._
 import kitsch.exception.KitschException
-
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import kitsch.partition.Partition
 import kitsch.util.Utils
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.reflect.{classTag, ClassTag}
+import scala.reflect.{ClassTag, classTag}
 import scala.util.Success
 
 abstract class RDD[T: ClassTag](@transient private var _kitsch: Kitsch)
@@ -44,9 +45,9 @@ abstract class RDD[T: ClassTag](@transient private var _kitsch: Kitsch)
 
   private[kitsch] def elementClassTag: ClassTag[T] = classTag[T]
 
-  def compute(): Iterator[T]
+  def compute(): Seq[Future[Partition[T]]]
 
-  final def iterator(): Iterator[T] = {
+  final def iterator() = {
     compute
   }
 
@@ -93,12 +94,13 @@ abstract class RDD[T: ClassTag](@transient private var _kitsch: Kitsch)
     kitsch.runJob(this, (iter: Iterator[T]) => f(iter))
   }
 
+  def count(): Long = kitsch.runJob(this, Utils.getIteratorSize)
+
   def collect(): Array[T] = withScope {
-    val results = kitsch.runJob(this, (iter: Iterator[T]) => iter.toArray)
-    Array.concat(results: _*)
+    kitsch.runJob(this, (iter: Iterator[T]) => iter.toArray)
+//    Array.concat(results: _*)
   }
 
-  def count(): Long = kitsch.runJob(this, Utils.getIteratorSize _).sum
 
   def collect[U: ClassTag](f: PartialFunction[T, U]): RDD[U] = withScope {
     filter(f.isDefinedAt).map(f)
@@ -122,7 +124,7 @@ abstract class RDD[T: ClassTag](@transient private var _kitsch: Kitsch)
       case _ => None
     }
 
-    kitsch.runJob(this, reducePartition).reduce(mergeResult).getOrElse(throw new UnsupportedOperationException("empty collection"))
+    Array(kitsch.runJob(this, reducePartition)).reduce(mergeResult).getOrElse(throw new UnsupportedOperationException("empty collection"))
   }
 }
 

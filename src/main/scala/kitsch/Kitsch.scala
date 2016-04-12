@@ -3,10 +3,12 @@ package kitsch
 import java.util.concurrent.atomic.AtomicInteger
 
 import akka.actor._
+import akka.pattern.ask
 import akka.util.Timeout
-import kitsch.linear.PartialLeastSquares
-import kitsch.rdd.{ParallelCollectionRDD, RDD, RDDOperationScope, TextRDD}
+import kitsch.message.{Job, ReadFile, SeqToRDD}
+import kitsch.rdd.{RDD, RDDOperationScope}
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
 
@@ -45,29 +47,26 @@ class Kitsch(name: String) {
 
   def makeRDD[T: ClassTag](seq: Seq[T]): RDD[T] = parallelize(seq)
 
-  def runJob[T, U: ClassTag](rdd: RDD[T], func: Iterator[T] => U): Array[U] =
-    Array(func(rdd.iterator()))
+//  def runJob[T, U: ClassTag](rdd: RDD[T], func: Iterator[T] => U): Array[U] =
+//    Array(func(rdd.iterator()))
+
+//  def parallelize[T: ClassTag](seq: Seq[T]): RDD[T] =
+//    withScope(new ParallelCollectionRDD[T](this, seq))
+//
+//  def textFile(path: String): RDD[String] = withScope {
+//    new TextRDD(this, path)
+//  }
+
+  def runJob[T, U: ClassTag](rdd: RDD[T], func: Iterator[T] => U) =
+    Await.result(ask(server, Job(rdd, func)), timeout.duration).asInstanceOf[U]
 
   def parallelize[T: ClassTag](seq: Seq[T]): RDD[T] =
-    withScope(new ParallelCollectionRDD[T](this, seq))
+    Await.result(ask(server, SeqToRDD(seq)), timeout.duration).asInstanceOf[RDD[T]]
 
-  def textFile(path: String): RDD[String] = withScope {
-    new TextRDD(this, path)
+  def textFile(path: String): RDD[String] = {
+    system.log.info(s"loading text file: $path")
+    Await.result(ask(server, ReadFile(path)), timeout.duration).asInstanceOf[RDD[String]]
   }
-
-//  def runJob[T, U: ClassTag](rdd: RDD[T], func: Iterator[T] => U) =
-//    ask(server, Job(rdd, func)).mapTo[List[U]].value match {
-//      case Some(Success(result)) => result
-//      case _                     => throw new KitschException("Run job failed")
-//    }
-//
-//  def makeRDD[T: ClassTag](seq: Seq[T]): RDD[T] =
-//    ask(server, SeqToRDD(seq)).mapTo[RDD[T]].value match {
-//      case Some(Success(result)) => result
-//      case Some(Failure(_))      => throw new KitschException("Failed to make RDD")
-//      case None                  =>
-//        throw new KitschException("Cannot make RDD")
-//    }
 }
 
 object Kitsch {
@@ -83,13 +82,17 @@ object Kitsch {
   private[kitsch] def newPartitionId: Int = nextPartitionId.getAndIncrement()
 
   def main (args: Array[String]){
-    val kitsch = new Kitsch("test")
-    val text = kitsch.textFile("./ml-100k/u.data")
-    val pls = PartialLeastSquares.train(
-      text,
-      (s:String) => s.split("\t").toSeq,
-      0)
-    println(pls.collect())
-    kitsch.halt
+    val kc = new Kitsch("test")
+    val text = kc.textFile("./ml-100k/u.data")
+      .map(_.split("\t"))
+      .map(_(1).toInt)
+      .reduce(_+_)
+    println(text)
+//    val pls = PartialLeastSquares.train(
+//      text,
+//      (s:String) => s.split("\t").toSeq,
+//      0)
+//    println(pls.collect())
+    kc.halt
   }
 }

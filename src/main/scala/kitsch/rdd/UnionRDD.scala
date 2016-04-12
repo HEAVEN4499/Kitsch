@@ -1,7 +1,9 @@
 package kitsch.rdd
 
 import kitsch.Kitsch
+import kitsch.partition.Partition
 
+import scala.concurrent.Future
 import scala.reflect.ClassTag
 
 /**
@@ -9,5 +11,7 @@ import scala.reflect.ClassTag
  */
 private[kitsch] class UnionRDD[T: ClassTag](kitsch: Kitsch, var rdds: Seq[RDD[T]])
   extends RDD[T](kitsch){
-  override def compute(): Iterator[T] = rdds.map(_.iterator()).reduce(_ ++ _)
+  override def compute(): Seq[Future[Partition[T]]] =
+    rdds.flatMap(rdd => rdd.iterator)
+//  override def compute(): Iterator[T] = rdds.map(_.iterator()).reduce(_ ++ _)
 }
